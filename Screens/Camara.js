@@ -1,83 +1,106 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
-    StyleSheet,
-    Text,
-    View,
-    TouchableOpacity,
-    FlatList,
-    Image,
-    TextInput,
-    ScrollView,
-  } from "react-native";
-  import { Camera } from "expo-camera";
-  import { useNavigation } from '@react-navigation/native'
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  FlatList,
+  Image,
+  Alert,
+  Modal,
+  Pressable 
+} from "react-native";
+import { Camera } from "expo-camera";
+import { useNavigation } from "@react-navigation/native";
+import Loading from "../Components/Loading";
 
-  export default function Camara () {
-    const navigation = useNavigation();
+export default function Camara({ route }) {
+  const [modalVisible, setModalVisible] = useState(false);
+  const navigation = useNavigation();
+  const refCamera = useRef(null);
+  const [hasPermission, setHasPermission] = useState(null);
+  const [type, setType] = useState(Camera.Constants.Type.back);
+  const [img, setImg] = useState(null);
+  const [showLoading, setShowLoading] = useState(false);
+  const [showCammera, setShowCammera] = useState(true);
 
-    const [hasPermission, setHasPermission] = useState(null);
-    const [type, setType] = useState(Camera.Constants.Type.back);
-    const [img, setImg] = useState([]);
+  const takePhoto = async () => {
+    const options = {
+      quality: 1,
+      base64: true,
+      fixOrientation: true,
+      exif: true,
+    };
+    const photo = await refCamera.current.takePictureAsync(options);
+    photo.exif.Orientation = 1;
+    setImg(photo);
+    setShowCammera(false);
+    setShowLoading(true);
+    setTimeout(() => {
+      setShowLoading(false);
+      setModalVisible(true);
+    }, 3000);
 
-    useEffect(() => {
-        (async () => {
-          const { status } = await Camera.requestCameraPermissionsAsync();
-          setHasPermission(status === "granted");
-          await Imagenes();
-        })();
-      }, []);
-    
-      const Imagenes = async () => {
-        const res = await fetch(`${env.CAMERA_HOST}`);
-        setImg(res.json());
-      };
-    
-      if (hasPermission === null) {
-        return <View />;
+    console.log({ photo: photo.base64, document: route.params.document });
+  };
+
+  const resetFunctions = () => {
+    setImg(null);
+    setShowCammera(true);
+    setShowLoading(false);
+    setModalVisible(false);
+  }
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setHasPermission(status === "granted");
+      //await Imagenes();
+    })();
+  }, []);
+
+  const Imagenes = async () => {
+    const res = await fetch(`${env.CAMERA_HOST}`);
+    setImg(res.json());
+  };
+
+  if (hasPermission === null) {
+    return <View />;
+  }
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
+
+  return (
+    <View>
+      {showCammera &&
+        <Camera style={styles.camera} type={type} ref={refCamera}>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.btnPositionCamera}
+              onPress={() => {
+                setType(
+                  type === Camera.Constants.Type.back
+                    ? Camera.Constants.Type.front
+                    : Camera.Constants.Type.back
+                );
+              }}
+            >
+              <Text style={styles.text}> Cambiar camara </Text>
+            </TouchableOpacity>
+          </View>
+        </Camera>
       }
-      if (hasPermission === false) {
-        return <Text>No access to camera</Text>;
-      }
-    return(
-        <View>
-<Camera style={styles.camera} type={type}>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => {
-              setType(
-                type === Camera.Constants.Type.back
-                  ? Camera.Constants.Type.front
-                  : Camera.Constants.Type.back
-              );
-            }}
-          >
-            <Text style={styles.text}> Cambiar camara </Text>
-          </TouchableOpacity>
-        </View>
-      </Camera>
 
-      <FlatList
-        data={img}
-        key={"2"}
-        numColumns={2}
-        renderItem={({ item }) => (
-          <Image
-            source={item}
-            style={{
-              width: 180,
-              height: 220,
-              borderWidth: 2,
-              borderColor: "#c35547",
-              resizeMode: "contain",
-              margin: 6,
-            }}
-            keyExtractor={(item) => item.id}
-          />
-        )}
-      />
+      { (!showCammera && img) &&
+        <Image
+          source={{uri: `data:image/jpeg;base64,${img.base64}`}}
+          style={styles.camera}
+        />
+      }
+      
       <TouchableOpacity
-        onPress={() => navigation.navigate("")}
+        onPress={() => takePhoto()}
         style={{
           backgroundColor: "#3296F3",
           padding: 10,
@@ -95,39 +118,110 @@ import {
           shadowOpacity: 0.32,
           shadowRadius: 5.46,
           elevation: 9,
-        }}>
+        }}
+      >
         <Text
           style={{
             fontSize: 25,
             textAlign: "center",
             color: "white",
-          }}>
+          }}
+        >
           Validar
         </Text>
       </TouchableOpacity>
-      </View>
-       ) }
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          Alert.alert("Modal has been closed.");
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Hello World!</Text>
+            <Pressable
+              style={[styles.button, styles.buttonClose]}
+              onPress={() => resetFunctions()}
+            >
+              <Text style={styles.textStyle}>OKKKKK</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
 
-       const styles = StyleSheet.create({
-        camera: {
-          alignSelf: "center",
-          marginTop: 60,
-          height: 500,
-          width: 350,
-        },
-        buttonContainer: {
-          flex: 1,
-          backgroundColor: "transparent",
-          flexDirection: "row",
-          margin: 20,
-        },
-        button: {
-          flex: 2,
-          alignSelf: "flex-end",
-          alignItems: "center",
-        },
-        text: {
-          fontSize: 15,
-          color: "white",
-        }
-      })
+      {
+        showLoading && (<Loading/>)
+      }
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  camera: {
+    alignSelf: "center",
+    marginTop: 60,
+    height: 500,
+    width: 350,
+  },
+  buttonContainer: {
+    flex: 1,
+    backgroundColor: "transparent",
+    flexDirection: "row",
+    margin: 20,
+  },
+  btnPositionCamera: {
+    flex: 2,
+    alignSelf: "flex-end",
+    alignItems: "center",
+  },
+  text: {
+    fontSize: 15,
+    color: "white",
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2
+  },
+  buttonOpen: {
+    backgroundColor: "green",
+  },
+  buttonClose: {
+    backgroundColor: "#2196F3",
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center"
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center"
+  }
+
+  
+});

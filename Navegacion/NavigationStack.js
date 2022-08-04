@@ -8,6 +8,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 
 
+
 const Stack = createStackNavigator();
 
 export default function NavigationStack() {
@@ -40,7 +41,7 @@ export default function NavigationStack() {
           name="auth"
           component={Autenticacion}
           options={{
-            title: "Registro Beneficio",
+            title: "REGISTRO BENEFICIO",
             headerShown: false
           }}
         />
@@ -49,10 +50,11 @@ export default function NavigationStack() {
           name="valido"
           component={Camara}
           options={{
-            title: "Registro",
+            title: "CAMARA",
             headerShown: false
           }}
         />
+        
       </Stack.Navigator>
     </NavigationContainer>
   )
