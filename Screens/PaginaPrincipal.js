@@ -18,15 +18,16 @@ const PaginaPrincipal = () => {
         style={{
           display: "flex",
           justifyContent: "center",
-          margin: 8,
-          marginTop: 100
+          margin: 10,
+          marginTop: 50
+
         }}>
         <Image
           style={{
             margin: 8,
             resizeMode: "center",
             alignSelf: "center",
-            height: 290,
+            height: 350,
             width: 340,
           }}
           source={require("../assets/logomia.png")}

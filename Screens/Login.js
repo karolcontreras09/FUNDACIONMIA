@@ -53,7 +53,7 @@ const Login = ({ navigation }) => {
             <Text style={styles.logintext3}>Construyendo Futuro</Text>
             <Form>
               <Text style={styles.inputtext}>Usuario</Text>
-              <Item style={styles.email}>
+              <Item style={styles.contraseña}>
                 <TextInput
                   style={styles.usu}
                   placeholder="Usuario"
@@ -73,7 +73,7 @@ const Login = ({ navigation }) => {
               </Item>
               <Text style={styles.inputtexterr}>{err}</Text>
               <Button style={styles.boton} onPress={() => handleSubmit()}>
-                <Text style={styles.botontext}>Iniciar Sesion</Text>
+                <Text style={styles.botontext}>Iniciar Sesión</Text>
               </Button>
             </Form>
           </View>
@@ -91,9 +91,9 @@ const styles = StyleSheet.create({
   },
 
   form: {
-    backgroundColor: "white",
+    backgroundColor: "#ffffff",
     margin: 30,
-    marginTop: 70,
+    marginTop: 50,
     borderRadius: 20,
     shadowColor: "#000",
     shadowOffset: {
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     fontSize: 25,
     marginTop: 40,
     textAlign: "center",
-    fontWeight: 'bold'
+    fontWeight: "bold",
   },
 
   logintext2: {
@@ -133,7 +133,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginTop: 35,
     marginLeft: 20,
-    marginRight: 20,
+    padding: 5,
+    width: "100%",
   },
 
   inputtexterr: {
@@ -143,35 +144,26 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginLeft: 20,
     marginRight: 20,
-  },
-
-  email: {
-    height: 45,
-    color: "black",
-    marginTop: -20,
-    marginLeft: 20,
-    marginRight: 20,
-    paddingLeft: 20,
-    borderWidth: 1,
-    borderRadius: 8,
-    borderColor: "gray",
+    textAlign: "center",
   },
   usu: {
     fontSize: 18,
+    width: "100%",
+    height: 40,
+    marginLeft: 20,
+    marginRight: "50%",
+    color: "black",
   },
   contraseña: {
-    height: 50,
-    color: "black",
-    marginTop: -20,
-    marginLeft: 20,
-    marginRight: 20,
-    paddingLeft: 20,
-    borderWidth: 1,
-    borderRadius: 8,
-    borderColor: "gray",
+    borderColor: "gray",  
+    marginRight: "5%",
   },
   contra: {
     fontSize: 18,
+    width: "100%",
+    height: 40,
+    marginLeft: 20,
+    color: "black",
   },
 
   boton: {
@@ -179,7 +171,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     justifyContent: "center",
     borderRadius: 10,
-    marginTop: 55,
+    marginTop: 35,
     marginBottom: 20,
     width: 240,
     height: 55,
@@ -199,8 +191,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   scroll: {
-    marginTop: 15,
-    flexDirection: 'column'
+    marginTop: "2%",
+    flexDirection: "column",
   },
   container: {
     flex: 1,

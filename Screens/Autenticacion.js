@@ -10,7 +10,7 @@ import {
   ScrollView,
 } from "react-native";
 import { Form, Item } from "native-base";
-import { Api } from "../Backend/Api";
+//import { Api } from "../Backend/Api";
 import env from "../env.json";
 import { useNavigation } from "@react-navigation/native";
 
@@ -34,7 +34,7 @@ export default function App() {
           display: "flex",
           justifyContent: "center",
           margin: 2,
-          marginTop: 40,
+          marginTop: 20,
         }}
       >
         <Image
@@ -122,6 +122,8 @@ const styles = StyleSheet.create({
   },
   doc: {
     fontSize: 18,
+    width: "100%",
+    
   },
   scroll: {
     flexDirection: "column",

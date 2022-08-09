@@ -8,7 +8,7 @@ import {
   Image,
   Alert,
   Modal,
-  Pressable 
+  Pressable,
 } from "react-native";
 import { Camera } from "expo-camera";
 import { useNavigation } from "@react-navigation/native";
@@ -23,8 +23,10 @@ export default function Camara({ route }) {
   const [img, setImg] = useState(null);
   const [showLoading, setShowLoading] = useState(false);
   const [showCammera, setShowCammera] = useState(true);
+  const [access, setAccess] = useState(null);
 
   const takePhoto = async () => {
+    const documents = ["1234", "0000", "1111"];
     const options = {
       quality: 1,
       base64: true,
@@ -39,6 +41,9 @@ export default function Camara({ route }) {
     setTimeout(() => {
       setShowLoading(false);
       setModalVisible(true);
+      const index = documents.indexOf(route.params.document);
+      if (index >= 0) setAccess("ACCESO PERMITIDO");
+      else setAccess("DATOS INCORRECTOS");
     }, 3000);
 
     console.log({ photo: photo.base64, document: route.params.document });
@@ -49,8 +54,7 @@ export default function Camara({ route }) {
     setShowCammera(true);
     setShowLoading(false);
     setModalVisible(false);
-  }
-
+  };
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
@@ -73,7 +77,7 @@ export default function Camara({ route }) {
 
   return (
     <View>
-      {showCammera &&
+      {showCammera && (
         <Camera style={styles.camera} type={type} ref={refCamera}>
           <View style={styles.buttonContainer}>
             <TouchableOpacity
@@ -90,15 +94,15 @@ export default function Camara({ route }) {
             </TouchableOpacity>
           </View>
         </Camera>
-      }
+      )}
 
-      { (!showCammera && img) &&
+      {!showCammera && img && (
         <Image
-          source={{uri: `data:image/jpeg;base64,${img.base64}`}}
+          source={{ uri: `data:image/jpeg;base64,${img.base64}` }}
           style={styles.camera}
         />
-      }
-      
+      )}
+
       <TouchableOpacity
         onPress={() => takePhoto()}
         style={{
@@ -141,20 +145,19 @@ export default function Camara({ route }) {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <Text style={styles.modalText}>Hello World!</Text>
+            <Text style={styles.modalText}> {access} </Text>
+
             <Pressable
               style={[styles.button, styles.buttonClose]}
               onPress={() => resetFunctions()}
             >
-              <Text style={styles.textStyle}>OKKKKK</Text>
+              <Text style={styles.textStyle}> ACEPTAR </Text>
             </Pressable>
           </View>
         </View>
       </Modal>
 
-      {
-        showLoading && (<Loading/>)
-      }
+      {showLoading && <Loading />}
     </View>
   );
 }
@@ -185,10 +188,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 22
+    marginTop: 22,
   },
   modalView: {
-    margin: 20,
+    margin: 50,
     backgroundColor: "white",
     borderRadius: 20,
     padding: 35,
@@ -196,16 +199,16 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 2
+      height: 2,
     },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    elevation: 5
+    elevation: 5,
   },
   button: {
     borderRadius: 20,
-    padding: 10,
-    elevation: 2
+    padding: 15,
+    elevation: 2,
   },
   buttonOpen: {
     backgroundColor: "green",
@@ -216,12 +219,11 @@ const styles = StyleSheet.create({
   textStyle: {
     color: "white",
     fontWeight: "bold",
-    textAlign: "center"
+    textAlign: "center",
   },
   modalText: {
     marginBottom: 15,
-    textAlign: "center"
-  }
-
-  
+    textAlign: "center",
+    fontSize: 18,
+  },
 });
