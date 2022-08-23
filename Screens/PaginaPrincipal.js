@@ -1,7 +1,9 @@
 import React from 'react'
-import { TouchableOpacity, Text, View, Image, Pressable } from 'react-native'
+import { TouchableOpacity, Text, View, Image,  } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { ScrollView } from 'react-native-gesture-handler';
+
+
 
 const PaginaPrincipal = () => {
 
@@ -12,7 +14,7 @@ const PaginaPrincipal = () => {
     <View style={{
       height: null,
       width: "100%",
-      backgroundColor: "white"
+      backgroundColor: "white",
     }}>
       <View
         style={{
@@ -54,7 +56,8 @@ const PaginaPrincipal = () => {
         style={{
           backgroundColor: "#3296F3",
           padding: 10,
-          marginTop: 100,
+          marginTop: 90,
+          marginBottom:50,
           width: 250,
           alignSelf: "center",
           borderRadius: 15,

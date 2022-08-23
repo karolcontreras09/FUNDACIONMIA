@@ -11,12 +11,12 @@ import {
   Pressable,
 } from "react-native";
 import { Camera } from "expo-camera";
-import { useNavigation } from "@react-navigation/native";
 import Loading from "../Components/Loading";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
-export default function Camara({ route }) {
+export default function Camara({ route, navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
-  const navigation = useNavigation();
   const refCamera = useRef(null);
   const [hasPermission, setHasPermission] = useState(null);
   const [type, setType] = useState(Camera.Constants.Type.back);
@@ -24,29 +24,51 @@ export default function Camara({ route }) {
   const [showLoading, setShowLoading] = useState(false);
   const [showCammera, setShowCammera] = useState(true);
   const [access, setAccess] = useState(null);
+  let [color, setColor] = useState(null);
 
   const takePhoto = async () => {
-    const documents = ["1234", "0000", "1111"];
-    const options = {
-      quality: 1,
-      base64: true,
-      fixOrientation: true,
-      exif: true,
-    };
-    const photo = await refCamera.current.takePictureAsync(options);
-    photo.exif.Orientation = 1;
-    setImg(photo);
-    setShowCammera(false);
-    setShowLoading(true);
-    setTimeout(() => {
-      setShowLoading(false);
-      setModalVisible(true);
-      const index = documents.indexOf(route.params.document);
-      if (index >= 0) setAccess("ACCESO PERMITIDO");
-      else setAccess("DATOS INCORRECTOS");
-    }, 3000);
+    try {
+      const documents = ["0000"];
+      const photo = await refCamera.current.takePictureAsync({ quality: 1, base64: true, fixOrientation: true, exif: true });
+      photo.exif.Orientation = 1;
 
-    console.log({ photo: photo.base64, document: route.params.document });
+      setImg(photo);
+      setShowCammera(false);
+      setShowLoading(true);
+
+      const data = {
+        userId: 14, //await AsyncStorage.getItem("id"),
+        benefitTypeName: route.params.complemento,
+        studentNid: route.params.document,
+        photoB64: photo.base64,
+      };
+
+      /*setTimeout(() => {
+        setShowLoading(false);
+        setModalVisible(true);
+        const index = documents.indexOf(route.params.document);
+        if (index >= 0) {
+          setAccess("¡RECONOCIMIENTO EXITOSO!");
+          setColor(styles.colorVerde);
+        } else {
+          setAccess("¡RECONOCIMIENTO FALLIDO!");
+          setColor(styles.colorRojo);
+        }
+      }, 3000);*/
+      // const respuesta = await axios.post("http://fundacionmia.com.co:8080/recognition", data);
+      const respuesta = await axios.post("http://192.168.107:8080/recognition/save-student-image", {
+        studentNid: 1083914553,
+        photo64: photo.base64
+
+      });
+
+      console.log(respuesta)
+      
+    } catch(e)  {
+      console.log(e)
+    }
+
+    
   };
 
   const resetFunctions = () => {
@@ -54,6 +76,7 @@ export default function Camara({ route }) {
     setShowCammera(true);
     setShowLoading(false);
     setModalVisible(false);
+    navigation.navigate("auth");
   };
   useEffect(() => {
     (async () => {
@@ -144,14 +167,14 @@ export default function Camara({ route }) {
         }}
       >
         <View style={styles.centeredView}>
-          <View style={styles.modalView}>
+          <View style={[styles.modalView, color]}>
             <Text style={styles.modalText}> {access} </Text>
 
             <Pressable
               style={[styles.button, styles.buttonClose]}
               onPress={() => resetFunctions()}
             >
-              <Text style={styles.textStyle}> ACEPTAR </Text>
+              <Text style={styles.textStyle}> VOLVER A REGISTRAR </Text>
             </Pressable>
           </View>
         </View>
@@ -214,16 +237,24 @@ const styles = StyleSheet.create({
     backgroundColor: "green",
   },
   buttonClose: {
-    backgroundColor: "#2196F3",
+    backgroundColor: "#FFF",
   },
   textStyle: {
     color: "white",
     fontWeight: "bold",
     textAlign: "center",
+    color: "#000",
   },
   modalText: {
     marginBottom: 15,
     textAlign: "center",
     fontSize: 18,
+    color: "white",
+  },
+  colorRojo: {
+    backgroundColor: "red",
+  },
+  colorVerde: {
+    backgroundColor: "green",
   },
 });

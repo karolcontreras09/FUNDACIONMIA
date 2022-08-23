@@ -8,6 +8,7 @@ import {
   Image,
   TextInput,
   ScrollView,
+  Switch,
 } from "react-native";
 import { Form, Item } from "native-base";
 //import { Api } from "../Backend/Api";
@@ -21,11 +22,38 @@ export default function App() {
 
   const [error, setError] = useState("");
   const handlePressTouch = () => {
-    if (document && document !== "") {
+    let lError = ""
+    if (document && document !== "" && (almuerzo || complementoam || complementopm)) {
       setError("");
-      navigation.navigate("valido", { document });
-    } else setError("El campo documento es obligatorio");
+      navigation.navigate("valido", { document, complemento: almuerzo ? "ALMUERZO" : complementoam ? "COMPLEMENTO_AM" : complementopm ? "COMPLEMENTO_PM" : "" });
+    }
+    
+    if (document == "") lError = lError + "El campo documento es obligatorio \n";
+    if (!(almuerzo || complementoam || complementopm)) lError = lError + "Debes seleccionar una opción \n";
+    setError(lError);
   };
+  const [almuerzo, setAlmuerzo] = useState(false);
+  const [complementoam, setComplementoam] = useState(false);
+  const [complementopm, setComplementopm] = useState(false);
+
+  const toggleSwitchAlmuerzo = () => {
+    setAlmuerzo(!almuerzo);
+    setComplementoam(false);
+    setComplementopm(false);
+  }
+
+  const toggleSwitchComplementoam = () => {
+    setComplementoam(!complementoam);
+    setAlmuerzo(false);
+    setComplementopm(false);
+  }
+
+  const toggleSwitchComplementopm = () => {
+    setComplementopm(!complementopm);
+    setAlmuerzo(false);
+    setComplementoam(false);
+  }
+
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scroll}>
@@ -60,13 +88,46 @@ export default function App() {
             />
           </Item>
         </Form>
-      
+      <View style={styles.Switch}>
+        <Switch style={styles.Switch}
+        trackColor={{ false: "#767577", true: "#81b0ff" }}
+        thumbColor={almuerzo ? "#f5dd4b" : "#f4f3f4"}
+        ios_backgroundColor="#3e3e3e"
+        onValueChange={toggleSwitchAlmuerzo}
+        value={almuerzo}
+        />
+      <Switch style={styles.Switch}
+        trackColor={{ false: "#767577", true: "#81b0ff" }}
+        thumbColor={complementoam ? "#f5dd4b" : "#f4f3f4"}
+        ios_backgroundColor="#3e3e3e"
+        onValueChange={toggleSwitchComplementoam}
+        value={complementoam}
+        />
+        <Switch style={styles.Switch}
+        trackColor={{ false: "#767577", true: "#81b0ff" }}
+        thumbColor={complementopm ? "#f5dd4b" : "#f4f3f4"}
+        ios_backgroundColor="#3e3e3e"
+        onValueChange={toggleSwitchComplementopm}
+        value={complementopm}
+        />
+      </View>
+      <View style={styles.switchtext}>
+          <Text style={styles.almu}>
+            Almuerzo
+          </Text> 
+          <Text style={styles.am}>
+            Complemento {'\n'} a.m
+          </Text>
+          <Text style={styles.pm}>
+            Complemento {'\n'} p.m
+          </Text>
+      </View>
       <TouchableOpacity
         onPress={() => handlePressTouch() }
         style={{
           backgroundColor: "#3296F3",
           padding: 10,
-          marginTop: 100,
+          marginTop: 70,
           width: 250,
           alignSelf: "center",
           borderRadius: 15,
@@ -140,5 +201,29 @@ const styles = StyleSheet.create({
     marginTop: 50,
     marginLeft: 20,
     marginRight: 20,
+  },
+  Switch: {
+    marginTop: 20,
+    marginRight: 50,
+    margin: 20,
+    flexDirection: "row",
+  },
+  switchtext:{
+    justifyContent: "center",
+    flexDirection: "row",
+    marginRight: 2,
+    marginLeft: 2,
+  },
+  almu:{
+    marginRight: 35,
+    
+  },
+  am:{
+    marginRight: 35,
+    textAlign: "center"
+  },
+  pm:{
+    textAlign: "center"
   }
+  
 });

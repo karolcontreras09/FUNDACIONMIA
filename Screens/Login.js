@@ -1,31 +1,22 @@
-import React, { useState, useEffect, Component } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import {
   StyleSheet,
-  Alert,
   View,
   TextInput,
   TouchableOpacity,
-} from "react-native";
-import {
-  Container,
-  Header,
-  Content,
-  Item,
-  Input,
-  Form,
-  Thumbnail,
-  Label,
-  Button,
   Text,
-} from "native-base";
+} from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import env from "../env.json";
-import { SafeAreaView } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
+import { Form, Item } from "native-base";
 
-const Login = ({ navigation }) => {
-  const [usernameOrEmail, setUsernameOrEmail] = useState(null);
-  const [password, setPassword] = useState(null);
+function Login() {
+  const navigation = useNavigation();
+  const [usernameOrEmail, setUsernameOrEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [err, setErr] = useState("");
 
   const handleSubmit = async () => {
@@ -34,9 +25,12 @@ const Login = ({ navigation }) => {
         usernameOrEmail,
         password,
       });
-      console.log(resp.status);
-      if (resp.status === 200) navigation.navigate("auth");
-      else setErr("Usuario no permitido");
+
+      if (resp.status === 200) {
+        navigation.navigate("auth");
+        AsyncStorage.setItem("token", resp.data.tokeDeAcceso);
+        AsyncStorage.setItem("id", String(resp.data.unUsuario.id));
+      } else setErr("Usuario no permitido");
     } catch (e) {
       console.log(e);
       setErr("Usuario no permitido");
@@ -44,48 +38,44 @@ const Login = ({ navigation }) => {
   };
 
   return (
-    <Container style={styles.body}>
-      <SafeAreaView style={styles.container}>
-        <ScrollView style={styles.scroll}>
-          <View style={styles.form}>
-            <Text style={styles.logintext1}>Bienvenido</Text>
-            <Text style={styles.logintext2}>Fundación Mía</Text>
-            <Text style={styles.logintext3}>Construyendo Futuro</Text>
-            <Form>
-              <Text style={styles.inputtext}>Usuario</Text>
-              <Item style={styles.contraseña}>
-                <TextInput
-                  style={styles.usu}
-                  placeholder="Usuario"
-                  value={usernameOrEmail}
-                  onChangeText={(text) => setUsernameOrEmail(text)}
-                />
-              </Item>
-              <Text style={styles.inputtext}>Contraseña</Text>
-              <Item style={styles.contraseña}>
-                <TextInput
-                  style={styles.contra}
-                  placeholder="Contraseña"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={true}
-                />
-              </Item>
-              <Text style={styles.inputtexterr}>{err}</Text>
-              <Button style={styles.boton} onPress={() => handleSubmit()}>
-                <Text style={styles.botontext}>Iniciar Sesión</Text>
-              </Button>
-            </Form>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </Container>
+    <ScrollView style={styles.scroll1}>
+      <View style={styles.form}>
+        <Text style={styles.logintext1}>Bienvenido</Text>
+        <Text style={styles.logintext2}>Fundación Mía</Text>
+        <Text style={styles.logintext3}>Construyendo Futuro</Text>
+        <Form>
+          <Text style={styles.inputtext}>Usuario</Text>
+          <Item style={styles.contraseña}>
+            <TextInput
+              style={styles.usu}
+              placeholder="Usuario"
+              value={usernameOrEmail}
+              onChangeText={(text) => setUsernameOrEmail(text)}
+            />
+          </Item>
+          <Text style={styles.inputtext}>Contraseña</Text>
+          <Item style={styles.contraseña}>
+            <TextInput
+              style={styles.contra}
+              placeholder="Contraseña"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={true}
+            />
+          </Item>
+          <Text style={styles.inputtexterr}>{err}</Text>
+          <TouchableOpacity style={styles.boton} onPress={() => handleSubmit()}>
+            <Text style={styles.botontext}>Iniciar Sesión</Text>
+          </TouchableOpacity>
+        </Form>
+      </View>
+    </ScrollView>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  body: {
-    backgroundColor: "#FF3939",
+  scroll1: {
+    backgroundColor: "#FE0000",
     height: null,
     width: "100%",
   },
@@ -155,7 +145,7 @@ const styles = StyleSheet.create({
     color: "black",
   },
   contraseña: {
-    borderColor: "gray",  
+    borderColor: "gray",
     marginRight: "5%",
   },
   contra: {
@@ -176,10 +166,6 @@ const styles = StyleSheet.create({
     width: 240,
     height: 55,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 5,
-    },
     shadowOpacity: 0.36,
     shadowRadius: 6.68,
     elevation: 11,
