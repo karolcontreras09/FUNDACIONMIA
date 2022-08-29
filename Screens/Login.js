@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
   StyleSheet,
@@ -10,11 +10,13 @@ import {
 import { ScrollView } from "react-native-gesture-handler";
 import env from "../env.json";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { Form, Item } from "native-base";
 
 function Login() {
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
+
   const [usernameOrEmail, setUsernameOrEmail] = useState("");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState("");
@@ -25,17 +27,28 @@ function Login() {
         usernameOrEmail,
         password,
       });
+      const rolesPermitidos = ["ROLE_RECTOR", "ROLE_COORDINADOR", "ROLE_PROFESOR"]
 
       if (resp.status === 200) {
-        navigation.navigate("auth");
-        AsyncStorage.setItem("token", resp.data.tokeDeAcceso);
-        AsyncStorage.setItem("id", String(resp.data.unUsuario.id));
+        const ArrRol = resp.data.unUsuario.roles;
+        if(ArrRol.length > 0 && rolesPermitidos.indexOf(ArrRol[0].nombre) >= 0) {
+          AsyncStorage.setItem("token", resp.data.tokeDeAcceso);
+          AsyncStorage.setItem("id", String(resp.data.unUsuario.id));
+          AsyncStorage.setItem("rol", ArrRol[0].nombre);
+          navigation.navigate("auth");
+        } else setErr("Usuario no permitido");
       } else setErr("Usuario no permitido");
     } catch (e) {
       console.log(e);
       setErr("Usuario no permitido");
     }
   };
+
+  useEffect(() => {
+    setErr("");
+    setUsernameOrEmail("");
+    setPassword("");
+  }, [isFocused])
 
   return (
     <ScrollView style={styles.scroll1}>

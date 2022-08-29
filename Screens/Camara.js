@@ -4,7 +4,6 @@ import {
   Text,
   View,
   TouchableOpacity,
-  FlatList,
   Image,
   Alert,
   Modal,
@@ -14,8 +13,12 @@ import { Camera } from "expo-camera";
 import Loading from "../Components/Loading";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 
-export default function Camara({ route, navigation }) {
+export default function Camara({ route }) {
+  const navigation = useNavigation();
+  const isFocused = useIsFocused();
+
   const [modalVisible, setModalVisible] = useState(false);
   const refCamera = useRef(null);
   const [hasPermission, setHasPermission] = useState(null);
@@ -24,12 +27,13 @@ export default function Camara({ route, navigation }) {
   const [showLoading, setShowLoading] = useState(false);
   const [showCammera, setShowCammera] = useState(true);
   const [access, setAccess] = useState(null);
-  let [color, setColor] = useState(null);
+  const [color, setColor] = useState(null);
+  const [url, setUrl] = useState("");
+  const [prefixMensaje, setPrefixMesaje] = useState("");
 
   const takePhoto = async () => {
     try {
-      const documents = ["0000"];
-      const photo = await refCamera.current.takePictureAsync({ quality: 1, base64: true, fixOrientation: true, exif: true });
+      const photo = await refCamera.current.takePictureAsync({ base64: true, exif: true });
       photo.exif.Orientation = 1;
 
       setImg(photo);
@@ -37,38 +41,21 @@ export default function Camara({ route, navigation }) {
       setShowLoading(true);
 
       const data = {
-        userId: 14, //await AsyncStorage.getItem("id"),
-        benefitTypeName: route.params.complemento,
-        studentNid: route.params.document,
-        photoB64: photo.base64,
+        userId: await AsyncStorage.getItem("id"),
+        benefitTypeName: String(route.params.complemento),
+        studentNid: String(route.params.document),
+        photoB64: photo.base64
       };
-
-      /*setTimeout(() => {
-        setShowLoading(false);
-        setModalVisible(true);
-        const index = documents.indexOf(route.params.document);
-        if (index >= 0) {
-          setAccess("¡RECONOCIMIENTO EXITOSO!");
-          setColor(styles.colorVerde);
-        } else {
-          setAccess("¡RECONOCIMIENTO FALLIDO!");
-          setColor(styles.colorRojo);
-        }
-      }, 3000);*/
-      // const respuesta = await axios.post("http://fundacionmia.com.co:8080/recognition", data);
-      const respuesta = await axios.post("http://192.168.107:8080/recognition/save-student-image", {
-        studentNid: 1083914553,
-        photo64: photo.base64
-
-      });
-
-      console.log(respuesta)
       
+      await axios.post(url, data);
+      setColor(styles.colorVerde);
+      setModalVisible(true);
+      setAccess(`${prefixMensaje} exitoso`);
     } catch(e)  {
-      console.log(e)
+      setColor(styles.colorRojo);
+      setModalVisible(true);
+      setAccess(`${prefixMensaje} fallo`);
     }
-
-    
   };
 
   const resetFunctions = () => {
@@ -78,18 +65,20 @@ export default function Camara({ route, navigation }) {
     setModalVisible(false);
     navigation.navigate("auth");
   };
+
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
+      const rol = await AsyncStorage.getItem("rol");
+      setUrl(
+        rol === "ROLE_PROFESOR" ?
+          "http://fundacionmia.com.co:8080/recognition" :
+          "http://fundacionmia.com.co:8080/recognition/save-student-image"
+      );
+      setPrefixMesaje(rol === "ROLE_PROFESOR" ? "Reconocimiento": "Registro");
       setHasPermission(status === "granted");
-      //await Imagenes();
     })();
-  }, []);
-
-  const Imagenes = async () => {
-    const res = await fetch(`${env.CAMERA_HOST}`);
-    setImg(res.json());
-  };
+  }, [isFocused]);
 
   if (hasPermission === null) {
     return <View />;
@@ -174,7 +163,7 @@ export default function Camara({ route, navigation }) {
               style={[styles.button, styles.buttonClose]}
               onPress={() => resetFunctions()}
             >
-              <Text style={styles.textStyle}> VOLVER A REGISTRAR </Text>
+              <Text style={styles.textStyle}> VOLVER </Text>
             </Pressable>
           </View>
         </View>
